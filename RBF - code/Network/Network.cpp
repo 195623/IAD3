@@ -32,7 +32,10 @@ Network::Network( vector<Pair> pairs, int gauss, int linear )
 
     for(int i = 0 ; i<gauss ; i++)
     {
-        this->gaussNeurons.push_back( GNeuron(0,0) ) ;
+        double beta = return_beta(inputCenters[i]) ;
+        double mu = inputCenters[i].return_x() ;
+
+        this->gaussNeurons.push_back( GNeuron(beta,mu) ) ;
     }
 
     for(int i = 0 ; i<linear ; i++)
@@ -52,12 +55,16 @@ double Network::choose_random_input()
 
 }
 
-double Network::output_beta()
+double Network::return_beta( Center_1D center )
 {
-    return 0 ;
+    double avg_dist = return_average_distance(center) ;
+
+    double beta = 1/(2*avg_dist*avg_dist) ;
+
+    return beta ;
 }
 
-vector<Point_1D> Network::output_assigned_points( Center_1D center )
+vector<Point_1D> Network::return_assigned_points( Center_1D center )
 {
     vector<Point_1D> assignedPoints ;
 
@@ -72,9 +79,19 @@ vector<Point_1D> Network::output_assigned_points( Center_1D center )
     return assignedPoints ;
 }
 
-double return_average_distance( Center_1D center )
+double Network::return_average_distance( Center_1D center )
 {
-    return 0 ;
+    vector<Point_1D> points = return_assigned_points(center) ;
+    double dist = 0 ;
+
+    double n = points.size() ;
+
+    for( int i = 0 ; i<n ; i++ )
+    {
+        dist += this->distance(points[i],center) ;
+    }
+
+    return dist/n ;
 }
 
 void Network::assign_closest_centers()

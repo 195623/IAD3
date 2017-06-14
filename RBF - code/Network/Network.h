@@ -11,9 +11,10 @@ class Network
 public:
     Network( std::vector<Pair> pairs, int gauss = 1, int linear = 1 ) ;
     double choose_random_input( ) ;
-    double output_beta( ) ;
+    double return_beta( Center_1D center ) ;
 
-    std::vector<Point_1D> output_assigned_points( Center_1D center ) ;
+    std::vector<Point_1D> return_assigned_points( Center_1D center ) ;
+    double return_average_distance( Center_1D center ) ;
 
     double return_avg_dist ( double center ) ;
     void   assign_closest_centers() ;
