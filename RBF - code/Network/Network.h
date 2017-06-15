@@ -19,8 +19,13 @@ public:
     double return_avg_dist ( double center ) ;
     void   assign_closest_centers() ;
     void   assign_single_center( Point_1D point ) ;
+    double calculate_error( int index ) ;
+    double diff_weight_error(int inputIndex);
+    void update_weights();
 
     double distance( Point_1D point, Center_1D center );
+
+    double convert_the_input( double input, int outputIndex = 0 ) ;
 
 
 private:
@@ -30,6 +35,8 @@ private:
     std::vector<Pair> pairs ;
 
     std::vector<Point_1D> inputPoints ;
+    std::vector<Point_1D> outputPoints ;
+
     std::vector<Center_1D> inputCenters ;
 
 

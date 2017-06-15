@@ -16,15 +16,16 @@ int main()
     Reader2 reader = Reader2() ;
     vector<Pair> pairs = reader.Create_Pairs("texts/approximation_train_1.txt");
 
-    Network network = Network( pairs );
+    int gauss, lin ;
 
-    //DotGroup dotGroup = DotGroup(,forgy,3);
+    cout<< "Gauss neurons: " ;
+    cin >> gauss ;
+    //cout << "Linear neurons: " ;
+    //cin>> lin ;
 
+    Network network = Network( pairs,gauss,1 );
 
-
-
-    //dotGroup.iterate(300,200,graphics);
-
+    cout << network.convert_the_input(.5) ;
 
     return 0 ;
 }

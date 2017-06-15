@@ -14,7 +14,8 @@ Network::Network( vector<Pair> pairs, int gauss, int linear )
 
     for(int i = 0 ;i<pairs.size();i++)
     {
-        inputPoints.push_back(Point_1D(pairs[i].return_input()));
+         inputPoints.push_back(Point_1D(pairs[i].return_input()));
+        outputPoints.push_back(Point_1D(pairs[i].return_output()));
     }
 
     for(int i = 0 ; i<gauss ; i++)
@@ -22,13 +23,6 @@ Network::Network( vector<Pair> pairs, int gauss, int linear )
         double input = choose_random_input() ;
         this->inputCenters.push_back(Center_1D(input,i)) ;
     }
-
-    // assign closest points
-
-    // calculate average distance
-
-    // calculate Beta
-
 
     for(int i = 0 ; i<gauss ; i++)
     {
@@ -43,6 +37,43 @@ Network::Network( vector<Pair> pairs, int gauss, int linear )
         this->linearNeurons.push_back( Neuron(gauss) ) ;
     }
 
+}
+
+double Network::diff_weight_error( int inputIndex )
+{
+    double trueInput = this->inputPoints[inputIndex] ;
+    double expectedOutput = this->outputPoints[inputIndex] ;
+    double trueOutput = convert_the_input(trueInput) ;
+
+    double diffWeightError = 0 ;
+
+    for(int gaussIndex = 0 ; gaussIndex<gaussNeurons.size() ;gaussIndex++)
+    {
+
+
+        diffWeightError += ( trueOutput-expectedOutput )*this->gaussNeurons[index].gauss_output(trueInput) ;
+    }
+
+
+
+    return diffWeightError ;
+}
+
+void Network::update_weights()
+{
+
+}
+
+double Network::calculate_error( int index )
+{
+    double trueInput = this->inputPoints[index].return_x();
+    double expectedOutput = this->outputPoints[index].return_x();
+
+    double trueOutput = convert_the_input(trueInput) ;
+
+    double error = (expectedOutput-trueOutput)*(expectedOutput-trueOutput)/2 ;
+
+    return error ;
 }
 
 double Network::choose_random_input()
@@ -128,4 +159,16 @@ double Network::distance( Point_1D point, Center_1D center )
 
     return dist ;
 
+}
+
+double Network::convert_the_input( double input, int outputIndex )
+{
+    vector<double> gaussOutput ;
+
+    for(int i = 0 ; i<gaussNeurons.size() ;i++)
+    {
+        gaussOutput.push_back(gaussNeurons[i].gauss_output(input)) ;
+    }
+
+    return linearNeurons[outputIndex].linear_output(gaussOutput) ;
 }
