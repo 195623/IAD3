@@ -1,7 +1,7 @@
 #include "../headers.h"
 using namespace std ;
 
-Network::Network( vector<Pair> pairs, int gauss, int linear )
+Network::Network( vector<Pair> pairs, int gauss, int linear, bool showCreation )
 {
     srand (time(NULL));
     this->pairs = pairs ;
@@ -29,42 +29,59 @@ Network::Network( vector<Pair> pairs, int gauss, int linear )
         double beta = return_beta(inputCenters[i]) ;
         double mu = inputCenters[i].return_x() ;
 
-        this->gaussNeurons.push_back( GNeuron(beta,mu) ) ;
+        this->gaussNeurons.push_back( GNeuron(beta,mu,showCreation) ) ;
     }
 
     for(int i = 0 ; i<linear ; i++)
     {
-        this->linearNeurons.push_back( Neuron(gauss) ) ;
+        this->linearNeurons.push_back( Neuron(gauss,showCreation) ) ;
     }
 
 }
 
-double Network::diff_weight_error( int inputIndex )
+double Network::diff_weight_error( int inputIndex, int weightIndex )
 {
-    double trueInput = this->inputPoints[inputIndex] ;
-    double expectedOutput = this->outputPoints[inputIndex] ;
+    double trueInput = this->inputPoints[inputIndex].return_x() ;
+
+    double expectedOutput = this->outputPoints[inputIndex].return_x() ;
     double trueOutput = convert_the_input(trueInput) ;
 
     double diffWeightError = 0 ;
 
-    for(int gaussIndex = 0 ; gaussIndex<gaussNeurons.size() ;gaussIndex++)
-    {
+    // make random order of learning
 
 
-        diffWeightError += ( trueOutput-expectedOutput )*this->gaussNeurons[index].gauss_output(trueInput) ;
-    }
+
+    // does it apply to 1 weight only?
+    //for(int gaussIndex = 0 ; gaussIndex<gaussNeurons.size() ;gaussIndex++)
+    //{
+        diffWeightError = ( trueOutput-expectedOutput )*this->gaussNeurons[weightIndex].gauss_output(trueInput) ;
+    //}
 
 
 
     return diffWeightError ;
 }
 
-void Network::update_weights()
+void Network::single_input_weights_update( int inputIndex )
 {
+    //for the instance of 1 linear neuron (since there is 1 output line)
+    for(int weightIndex = 0 ; weightIndex<gaussNeurons.size() ; weightIndex++ )
+    {
+        this->linearNeurons[0].modify_weight(weightIndex,-diff_weight_error(inputIndex,weightIndex)) ;
+    }
 
 }
 
-double Network::calculate_error( int index )
+void Network::all_inputs_weights_update()
+{
+    for(int i = 0 ; i<inputPoints.size() ; i++ )
+    {
+        single_input_weights_update(i) ;
+    }
+}
+
+double Network::single_input_error( int index )
 {
     double trueInput = this->inputPoints[index].return_x();
     double expectedOutput = this->outputPoints[index].return_x();
@@ -72,6 +89,18 @@ double Network::calculate_error( int index )
     double trueOutput = convert_the_input(trueInput) ;
 
     double error = (expectedOutput-trueOutput)*(expectedOutput-trueOutput)/2 ;
+
+    return error ;
+}
+
+double Network::error_for_all_inputs()
+{
+    double error = 0 ;
+
+    for( int i = 0 ; i<inputPoints.size() ; i++ )
+    {
+        error += single_input_error(i) ;
+    }
 
     return error ;
 }

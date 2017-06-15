@@ -9,7 +9,7 @@ class Center_1D ;
 class Network
 {
 public:
-    Network( std::vector<Pair> pairs, int gauss = 1, int linear = 1 ) ;
+    Network( std::vector<Pair> pairs, int gauss = 1, int linear = 1, bool showCreation = false ) ;
     double choose_random_input( ) ;
     double return_beta( Center_1D center ) ;
 
@@ -19,9 +19,12 @@ public:
     double return_avg_dist ( double center ) ;
     void   assign_closest_centers() ;
     void   assign_single_center( Point_1D point ) ;
-    double calculate_error( int index ) ;
-    double diff_weight_error(int inputIndex);
-    void update_weights();
+
+    double single_input_error( int inputIndex ) ;
+    double error_for_all_inputs() ;
+    double diff_weight_error(int inputIndex, int weightIndex );
+    void single_input_weights_update( int inputIndex );
+    void all_inputs_weights_update() ;
 
     double distance( Point_1D point, Center_1D center );
 

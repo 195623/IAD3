@@ -6,8 +6,9 @@
 class Neuron
 {
 public:
-    Neuron( int inputs ) ;
+    Neuron( int inputs, bool showCreation = false ) ;
     double linear_output( std::vector<double> inputs ) ;
+    void modify_weight( int index, double value ) ;
 
 private:
     std::vector<double> weights ;

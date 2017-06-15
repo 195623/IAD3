@@ -6,7 +6,7 @@
 class GNeuron
 {
 public:
-    GNeuron( double beta = 0, double mu = 0 ) ;
+    GNeuron( double beta = 0, double mu = 0, bool showCreation = false ) ;
     double gauss_output( double input ) ;
 
 private:
