@@ -9,7 +9,14 @@ class Center_1D ;
 class Network
 {
 public:
-    Network( std::vector<Pair> pairs, int gauss = 1, int linear = 1, bool showCreation = false ) ;
+    Network( std::vector<Pair> trainingPairs,
+             std::vector<Pair> testPairs,
+             int gauss = 1,
+             int linear = 1,
+             double eta = .1,
+             double plusMu = 0,
+             double plusBeta = 0,
+             bool showCreation = false ) ;
     double choose_random_input( ) ;
     double return_beta( Center_1D center ) ;
 
@@ -24,23 +31,29 @@ public:
     double error_for_all_inputs() ;
     double diff_weight_error(int inputIndex, int weightIndex );
     void single_input_weights_update( int inputIndex );
-    void all_inputs_weights_update() ;
+    std::vector<std::string> all_inputs_weights_update( int iterations = 1 ) ;
 
     double distance( Point_1D point, Center_1D center );
 
-    double convert_the_input( double input, int outputIndex = 0 ) ;
+    double whole_network_output( double input, int outputIndex = 0 ) ;
 
 
 private:
     std::vector<GNeuron> gaussNeurons ;
     std::vector<Neuron> linearNeurons ;
 
-    std::vector<Pair> pairs ;
+    std::vector<Pair> trainingPairs ;
+    std::vector<Pair> testPairs ;
 
-    std::vector<Point_1D> inputPoints ;
-    std::vector<Point_1D> outputPoints ;
+    std::vector<Point_1D> inputTrainSamples ;
+    std::vector<Point_1D> outputTrainSamples ;
+
+    std::vector<Point_1D> inputTestSamples ;
+    std::vector<Point_1D> outputTestSamples ;
 
     std::vector<Center_1D> inputCenters ;
+
+    double eta ;
 
 
 };

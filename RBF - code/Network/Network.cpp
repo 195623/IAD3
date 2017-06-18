@@ -1,21 +1,32 @@
 #include "../headers.h"
 using namespace std ;
 
-Network::Network( vector<Pair> pairs, int gauss, int linear, bool showCreation )
+Network::Network( vector<Pair> trainingPairs,
+                  vector<Pair> testPairs,
+                  int gauss, int linear,
+                  double eta,
+                  double plusMu,
+                  double plusBeta,
+                  bool showCreation )
 {
-    srand (time(NULL));
-    this->pairs = pairs ;
+    this->eta = eta ;
+
+    this->trainingPairs = trainingPairs ;
+    this->testPairs = testPairs ;
 
     // create Gauss neurons, based on one-dimensional center's average distance to its points.
-    // [choose #gauss random inputs from pairs as centers]
+    // [choose #gauss random inputs from trainingPairs as centers]
     // for each gaussNeuron.
     // * mu = center,
     // * beta = 1/dist^2, where dist = avg(distance(center,points))
 
-    for(int i = 0 ;i<pairs.size();i++)
+    for(int i = 0 ;i<trainingPairs.size();i++)
     {
-         inputPoints.push_back(Point_1D(pairs[i].return_input()));
-        outputPoints.push_back(Point_1D(pairs[i].return_output()));
+         inputTrainSamples.push_back(Point_1D(trainingPairs[i].return_input()) );
+        outputTrainSamples.push_back(Point_1D(trainingPairs[i].return_output()));
+
+         inputTestSamples.push_back(Point_1D(testPairs[i].return_input()) );
+        outputTestSamples.push_back(Point_1D(testPairs[i].return_output()));
     }
 
     for(int i = 0 ; i<gauss ; i++)
@@ -26,8 +37,8 @@ Network::Network( vector<Pair> pairs, int gauss, int linear, bool showCreation )
 
     for(int i = 0 ; i<gauss ; i++)
     {
-        double beta = return_beta(inputCenters[i]) ;
-        double mu = inputCenters[i].return_x() ;
+        double beta = plusBeta+return_beta(inputCenters[i]) ; //        use plusMu and plusBeta multipliers
+        double mu =  plusMu+inputCenters[i].return_x() ;
 
         this->gaussNeurons.push_back( GNeuron(beta,mu,showCreation) ) ;
     }
@@ -41,10 +52,10 @@ Network::Network( vector<Pair> pairs, int gauss, int linear, bool showCreation )
 
 double Network::diff_weight_error( int inputIndex, int weightIndex )
 {
-    double trueInput = this->inputPoints[inputIndex].return_x() ;
+    double trueInput = this->inputTrainSamples[inputIndex].return_x() ;
 
-    double expectedOutput = this->outputPoints[inputIndex].return_x() ;
-    double trueOutput = convert_the_input(trueInput) ;
+    double expectedOutput = this->outputTrainSamples[inputIndex].return_x() ;
+    double trueOutput = whole_network_output(trueInput) ;
 
     double diffWeightError = 0 ;
 
@@ -59,8 +70,8 @@ double Network::diff_weight_error( int inputIndex, int weightIndex )
     //}
 
 
-
     return diffWeightError ;
+
 }
 
 void Network::single_input_weights_update( int inputIndex )
@@ -68,25 +79,42 @@ void Network::single_input_weights_update( int inputIndex )
     //for the instance of 1 linear neuron (since there is 1 output line)
     for(int weightIndex = 0 ; weightIndex<gaussNeurons.size() ; weightIndex++ )
     {
-        this->linearNeurons[0].modify_weight(weightIndex,-diff_weight_error(inputIndex,weightIndex)) ;
+        this->linearNeurons[0].modify_weight(weightIndex,-eta*diff_weight_error(inputIndex,weightIndex)) ;
     }
 
 }
 
-void Network::all_inputs_weights_update()
+
+
+vector<string> Network::all_inputs_weights_update( int iterations )
 {
-    for(int i = 0 ; i<inputPoints.size() ; i++ )
+    vector<string> output ;
+
+    output.push_back("Error\n") ;
+
+    for( int j = 0 ; j<iterations ; j++ )
     {
-        single_input_weights_update(i) ;
+        double thisError = this->error_for_all_inputs() ;
+        output.push_back(dts(thisError) + '\n') ;
+
+        for(int i = 0 ; i<inputTrainSamples.size() ; i++ )
+        {
+            int r = rand()%inputTrainSamples.size() ;
+            //cout << r << '-' ;
+            single_input_weights_update(r) ;
+        }
     }
+
+
+    return output ;
 }
 
-double Network::single_input_error( int index )
+double Network::single_input_error( int index )             // error compared against the testSamples, NOT trainingSamples
 {
-    double trueInput = this->inputPoints[index].return_x();
-    double expectedOutput = this->outputPoints[index].return_x();
+    double trueInput = this->inputTestSamples[index].return_x();
+    double expectedOutput = this->outputTestSamples[index].return_x();
 
-    double trueOutput = convert_the_input(trueInput) ;
+    double trueOutput = whole_network_output(trueInput) ;
 
     double error = (expectedOutput-trueOutput)*(expectedOutput-trueOutput)/2 ;
 
@@ -97,21 +125,24 @@ double Network::error_for_all_inputs()
 {
     double error = 0 ;
 
-    for( int i = 0 ; i<inputPoints.size() ; i++ )
+    for( int i = 0 ; i<inputTrainSamples.size() ; i++ )
     {
         error += single_input_error(i) ;
     }
 
-    return error ;
+    return error/inputTrainSamples.size() ;
 }
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
 
 double Network::choose_random_input()
 {
-    int numberOfPairs = pairs.size() ;
+    int numberOfPairs = trainingPairs.size() ;
 
     int randomPairIndex = rand()%numberOfPairs ;
 
-    return pairs[randomPairIndex].return_input() ;
+    return trainingPairs[randomPairIndex].return_input() ;
 
 }
 
@@ -128,11 +159,11 @@ vector<Point_1D> Network::return_assigned_points( Center_1D center )
 {
     vector<Point_1D> assignedPoints ;
 
-    for( int i = 0 ; i<inputPoints.size() ; i++ )
+    for( int i = 0 ; i<inputTrainSamples.size() ; i++ )
     {
-        if( inputPoints[i].return_centerID() == center.return_ID() )
+        if( inputTrainSamples[i].return_centerID() == center.return_ID() )
         {
-            assignedPoints.push_back(inputPoints[i]);
+            assignedPoints.push_back(inputTrainSamples[i]);
         }
     }
 
@@ -156,9 +187,9 @@ double Network::return_average_distance( Center_1D center )
 
 void Network::assign_closest_centers()
 {
-    for(int i = 0 ; i< this->inputPoints.size()  ; i++ )
+    for(int i = 0 ; i< this->inputTrainSamples.size()  ; i++ )
     {
-        assign_single_center(inputPoints[i]);
+        assign_single_center(inputTrainSamples[i]);
     }
 }
 
@@ -190,7 +221,9 @@ double Network::distance( Point_1D point, Center_1D center )
 
 }
 
-double Network::convert_the_input( double input, int outputIndex )
+// --------------------------------
+
+double Network::whole_network_output( double input, int outputIndex )
 {
     vector<double> gaussOutput ;
 

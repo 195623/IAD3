@@ -14,3 +14,5 @@
 #include "Network/Network.h"
 #include "Network/Neuron.h"
 #include "Network/GNeuron.h"
+
+#include <fstream>

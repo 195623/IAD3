@@ -96,7 +96,6 @@ vector<Pair> Reader2::Create_Pairs( string fileName )
     //*pPairsB = Parse_All_Lines(lines) ;
 }
 
-/*
 void Reader2::write_thing_into_csv( string fileName, vector<string> thing )
 {
     char* fileNameC = (char*) &fileName[0] ;
@@ -116,7 +115,7 @@ void Reader2::write_thing_into_csv( string fileName, vector<string> thing )
 
 }
 
-void Reader2::write_to_csv( string fileName )
+/*void Reader2::write_to_csv( string fileName )
 {
     char* fileNameC = (char*) &fileName[0] ;
     ofstream myfile;

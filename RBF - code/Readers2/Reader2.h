@@ -16,6 +16,8 @@ public:
 
     std::vector<Pair> Create_Pairs( std::string fileName );
 
+    void write_thing_into_csv( std::string fileName, std::vector<std::string> thing ) ;
+
     private:
 
 };

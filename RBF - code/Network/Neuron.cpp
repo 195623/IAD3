@@ -1,9 +1,10 @@
 #include "../headers.h"
 using namespace std ;
 
+
 Neuron::Neuron( int inputs, bool showCreation )
 {
-    if(showCreation) cout << "Neuron: ";
+    if(showCreation) cout << "   Neuron: ";
     for(int i = 0 ; i<inputs ; i++)
     {
         double r = (double) (rand()%1000)/1000 ;
