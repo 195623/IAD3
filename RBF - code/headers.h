@@ -7,7 +7,7 @@
 
 #include "Readers2/Reader2.h"       // collapse both Readers into one
 
-#include "data/DotGroup.h"
+//#include "data/DotGroup.h"
 #include "data/Pair.h"
 #include "data/Center_1D.h"
 
@@ -16,3 +16,5 @@
 #include "Network/GNeuron.h"
 
 #include <fstream>
+
+std::string dts( double db ) ;

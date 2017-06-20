@@ -13,6 +13,11 @@ double Point_1D::return_x()
     return this->x ;
 }
 
+void Point_1D::set_x( double x )
+{
+    this->x = x ;
+}
+
 int Point_1D::return_centerID()
 {
     return this->centerID ;

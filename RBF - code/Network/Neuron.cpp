@@ -12,7 +12,9 @@ Neuron::Neuron( int inputs, bool showCreation )
 
         weights.push_back(r) ;
     }
-    if(showCreation) cout << '\n' ;
+
+    this->bias = (double) (rand()%1000)/1000 ;
+    if(showCreation) cout <<"bias = " << bias << '\n' ;
 
 }
 
@@ -25,10 +27,16 @@ double Neuron::linear_output( vector<double> inputs )
         output += weights[i]*inputs[i] ;
     }
 
-    return output ;
+    return output+bias ;
 }
 
 void Neuron::modify_weight( int index, double value )
 {
     this->weights[index] += value ;
 }
+
+void Neuron::modify_bias( double value )
+{
+    this->bias += value ;
+}
+

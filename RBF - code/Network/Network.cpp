@@ -5,8 +5,6 @@ Network::Network( vector<Pair> trainingPairs,
                   vector<Pair> testPairs,
                   int gauss, int linear,
                   double eta,
-                  double plusMu,
-                  double plusBeta,
                   bool showCreation )
 {
     this->eta = eta ;
@@ -35,10 +33,13 @@ Network::Network( vector<Pair> trainingPairs,
         this->inputCenters.push_back(Center_1D(input,i)) ;
     }
 
+    assign_closest_centers();
+    relocate_all_centers() ;
+
     for(int i = 0 ; i<gauss ; i++)
     {
-        double beta = plusBeta+return_beta(inputCenters[i]) ; //        use plusMu and plusBeta multipliers
-        double mu =  plusMu+inputCenters[i].return_x() ;
+        double beta = return_beta(inputCenters[i]) ; //        use plusMu and plusBeta multipliers
+        double mu =  inputCenters[i].return_x() ;
 
         this->gaussNeurons.push_back( GNeuron(beta,mu,showCreation) ) ;
     }
@@ -74,13 +75,24 @@ double Network::diff_weight_error( int inputIndex, int weightIndex )
 
 }
 
-void Network::single_input_weights_update( int inputIndex )
+double Network::diff_bias_error( int inputIndex )
+{
+    double trueInput = inputTestSamples[inputIndex].return_x(),
+           expectedOutput = outputTestSamples[inputIndex].return_x(),
+           trueOutput = whole_network_output(trueInput) ;
+
+           return (trueOutput-expectedOutput) ;
+}
+
+void Network::single_update( int inputIndex )
 {
     //for the instance of 1 linear neuron (since there is 1 output line)
     for(int weightIndex = 0 ; weightIndex<gaussNeurons.size() ; weightIndex++ )
     {
         this->linearNeurons[0].modify_weight(weightIndex,-eta*diff_weight_error(inputIndex,weightIndex)) ;
     }
+
+    this->linearNeurons[0].modify_bias(-eta*diff_bias_error(inputIndex)) ;
 
 }
 
@@ -101,7 +113,7 @@ vector<string> Network::all_inputs_weights_update( int iterations )
         {
             int r = rand()%inputTrainSamples.size() ;
             //cout << r << '-' ;
-            single_input_weights_update(r) ;
+            single_update(r) ;
         }
     }
 
@@ -136,90 +148,7 @@ double Network::error_for_all_inputs()
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-double Network::choose_random_input()
-{
-    int numberOfPairs = trainingPairs.size() ;
 
-    int randomPairIndex = rand()%numberOfPairs ;
-
-    return trainingPairs[randomPairIndex].return_input() ;
-
-}
-
-double Network::return_beta( Center_1D center )
-{
-    double avg_dist = return_average_distance(center) ;
-
-    double beta = 1/(2*avg_dist*avg_dist) ;
-
-    return beta ;
-}
-
-vector<Point_1D> Network::return_assigned_points( Center_1D center )
-{
-    vector<Point_1D> assignedPoints ;
-
-    for( int i = 0 ; i<inputTrainSamples.size() ; i++ )
-    {
-        if( inputTrainSamples[i].return_centerID() == center.return_ID() )
-        {
-            assignedPoints.push_back(inputTrainSamples[i]);
-        }
-    }
-
-    return assignedPoints ;
-}
-
-double Network::return_average_distance( Center_1D center )
-{
-    vector<Point_1D> points = return_assigned_points(center) ;
-    double dist = 0 ;
-
-    double n = points.size() ;
-
-    for( int i = 0 ; i<n ; i++ )
-    {
-        dist += this->distance(points[i],center) ;
-    }
-
-    return dist/n ;
-}
-
-void Network::assign_closest_centers()
-{
-    for(int i = 0 ; i< this->inputTrainSamples.size()  ; i++ )
-    {
-        assign_single_center(inputTrainSamples[i]);
-    }
-}
-
-void Network::assign_single_center( Point_1D point )
-{
-    double currentDistance = this->distance(point,inputCenters[0]) ;
-    int currentID = 0 ;
-
-    for(vector<Center_1D>::iterator it = inputCenters.begin() ; it != inputCenters.end() ; it++ )
-    {
-        double dist = this->distance(point,*it) ;
-        double ID = (*it).return_ID();
-
-        if( dist <= currentDistance )
-        {
-            currentDistance = dist ;
-            currentID = ID ;
-        }
-    }
-
-    point.set_centerID(currentID) ;
-}
-
-double Network::distance( Point_1D point, Center_1D center )
-{
-    double dist = abs(point.return_x()-center.return_x());
-
-    return dist ;
-
-}
 
 // --------------------------------
 
