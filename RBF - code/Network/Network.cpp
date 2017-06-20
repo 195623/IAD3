@@ -33,8 +33,9 @@ Network::Network( vector<Pair> trainingPairs,
         this->inputCenters.push_back(Center_1D(input,i)) ;
     }
 
-    assign_closest_centers();
-    relocate_all_centers() ;
+    //cout <<"Number of centers: "<< inputCenters.size() << " | ";
+
+     /*-----------------------*/ k_means() ;
 
     for(int i = 0 ; i<gauss ; i++)
     {
@@ -51,6 +52,8 @@ Network::Network( vector<Pair> trainingPairs,
 
 }
 
+
+
 double Network::diff_weight_error( int inputIndex, int weightIndex )
 {
     double trueInput = this->inputTrainSamples[inputIndex].return_x() ;
@@ -60,15 +63,8 @@ double Network::diff_weight_error( int inputIndex, int weightIndex )
 
     double diffWeightError = 0 ;
 
-    // make random order of learning
+    diffWeightError = ( trueOutput-expectedOutput )*this->gaussNeurons[weightIndex].gauss_output(trueInput) ;
 
-
-
-    // does it apply to 1 weight only?
-    //for(int gaussIndex = 0 ; gaussIndex<gaussNeurons.size() ;gaussIndex++)
-    //{
-        diffWeightError = ( trueOutput-expectedOutput )*this->gaussNeurons[weightIndex].gauss_output(trueInput) ;
-    //}
 
 
     return diffWeightError ;
@@ -77,34 +73,33 @@ double Network::diff_weight_error( int inputIndex, int weightIndex )
 
 double Network::diff_bias_error( int inputIndex )
 {
-    double trueInput = inputTestSamples[inputIndex].return_x(),
-           expectedOutput = outputTestSamples[inputIndex].return_x(),
+    double trueInput = inputTrainSamples[inputIndex].return_x(),
+           expectedOutput = outputTrainSamples[inputIndex].return_x(),
            trueOutput = whole_network_output(trueInput) ;
 
            return (trueOutput-expectedOutput) ;
 }
 
-void Network::single_update( int inputIndex )
+void Network::single_update( int inputIndex, int outputIndex ) // outputIndex = 0 by default
 {
-    //for the instance of 1 linear neuron (since there is 1 output line)
     for(int weightIndex = 0 ; weightIndex<gaussNeurons.size() ; weightIndex++ )
     {
-        this->linearNeurons[0].modify_weight(weightIndex,-eta*diff_weight_error(inputIndex,weightIndex)) ;
+        this->linearNeurons[outputIndex].modify_weight(weightIndex,-eta*diff_weight_error(inputIndex,weightIndex)) ;
     }
 
-    this->linearNeurons[0].modify_bias(-eta*diff_bias_error(inputIndex)) ;
-
+    this->linearNeurons[outputIndex].modify_bias(-eta*diff_bias_error(inputIndex)) ;
 }
 
 
 
-vector<string> Network::all_inputs_weights_update( int iterations )
+vector<string> Network::all_parameters_update( int iterations )
 {
     vector<string> output ;
 
     output.push_back("Error\n") ;
 
-    for( int j = 0 ; j<iterations ; j++ )
+    for(;error_for_all_inputs()>0.1;)
+    //for( int j = 0 ; j<iterations ; j++ )
     {
         double thisError = this->error_for_all_inputs() ;
         output.push_back(dts(thisError) + '\n') ;

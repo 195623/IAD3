@@ -28,7 +28,7 @@ int main()
     //          INSERT CHOICE OF TRAINING/TEST SETS
     // --------------------------------
 
-    int gauss, lin = 1, iterations = 1000, repeats = 3 ;
+    int gauss, lin = 1, iterations = 1000, repeats = 5 ;
     bool displayAttributes ;
     double eta ;
 
@@ -57,7 +57,7 @@ int main()
 
         cout << network.error_for_all_inputs() ;
 
-        vector<string> output = network.all_inputs_weights_update(iterations) ;                   // random order of training points
+        vector<string> output = network.all_parameters_update(iterations) ;                   // random order of training points
         reader.write_thing_into_csv(name,output);
 
         currentError = network.error_for_all_inputs() ;

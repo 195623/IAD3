@@ -30,8 +30,8 @@ public:
 
 
 
-    void single_update( int inputIndex );
-    std::vector<std::string> all_inputs_weights_update( int iterations = 1 ) ;
+    void single_update( int inputIndex, int outputIndex = 0 );
+    std::vector<std::string> all_parameters_update( int iterations = 1 ) ;
 
 
 
@@ -44,7 +44,10 @@ public:
     double return_average_distance( Center_1D center ) ;
     double return_avg_dist ( double center ) ;
     void   assign_closest_centers() ;
-    void   assign_single_center( Point_1D point ) ;
+    void   assign_single_center( int index ) ;
+    void   k_means();
+
+    bool no_ID_was_changed() ;
 
 
 

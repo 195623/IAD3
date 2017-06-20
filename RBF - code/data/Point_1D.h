@@ -8,8 +8,12 @@ public:
     int    return_centerID() ;
 
     void set_centerID( int ID ) ;
+    bool idWasUnchanged() ;
 
 protected:
     double x ;
     int centerID ;
+    int previousCenterID ;
+
+    int changeCount ;
 };

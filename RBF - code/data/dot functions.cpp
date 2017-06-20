@@ -31,11 +31,80 @@ double Network::return_average_distance( Center_1D center )
     return dist/n ;
 }
 
+void Network::k_means()
+{
+    for(int i = 0 ; !no_ID_was_changed() ; i++ )
+    {
+        //if(i%100000==0) cout << "[" << i << "]" << '\n' ;
+        assign_closest_centers();
+        relocate_all_centers() ;
+    }
+
+    assign_closest_centers();
+}
+
+bool Network::no_ID_was_changed()
+{
+    int unchangedIDs = 0 ;
+    bool noIdWasChanged = false ;
+    int n = inputTrainSamples.size() ;
+
+    for(int i = 0 ; i<n ; i++ )
+    {
+        unchangedIDs += inputTrainSamples[i].idWasUnchanged() ;
+    }
+
+    //cout << unchangedIDs << "/" << n << '\n' ;
+
+    if(unchangedIDs==n) noIdWasChanged = true ;
+
+    return noIdWasChanged ;
+}
+
 void Network::assign_closest_centers()
 {
     for(int i = 0 ; i< this->inputTrainSamples.size()  ; i++ )
     {
-        assign_single_center(inputTrainSamples[i]);
+        //cout << "point_" << i << ": " ;
+        assign_single_center(i);
+    }
+}
+
+void Network::assign_single_center( int index )
+{
+    double currentDistance = this->distance(inputTrainSamples[index],inputCenters[0]) ;
+
+    //cout << "Number of centers: " << inputCenters.size();
+    //cin.get();
+
+    //cout << "\t\t\t\tdist: " << currentDistance ;
+
+
+    int currentID = 0 ;
+
+    for(vector<Center_1D>::iterator it = inputCenters.begin() ; it != inputCenters.end() ; it++ )
+    {
+        double dist = this->distance(inputTrainSamples[index],*it) ;
+        double ID = (*it).return_ID();
+
+        if( dist <= currentDistance )
+        {
+            //cout << "*" ;
+            currentDistance = dist ;
+            currentID = ID ;
+        }
+    }
+
+    //cout << "-->" << currentDistance <<'\n';
+
+    inputTrainSamples[index].set_centerID(currentID) ;
+}
+
+void Network::relocate_all_centers()
+{
+    for(int i = 0  ; i<this->inputCenters.size() ; i++)
+    {
+        relocate_center(inputCenters[i]);
     }
 }
 
@@ -50,35 +119,14 @@ void Network::relocate_center( Center_1D center )
     for(int i = 0 ; i<n ; i++) x+=points[i].return_x() ;
 
     center.set_x(x);
+
+    //cout <<"&" ;
 }
 
-void Network::relocate_all_centers()
-{
-    for(int i = 0  ; i<this->inputCenters.size() ; i++)
-    {
-        relocate_center(inputCenters[i]);
-    }
-}
 
-void Network::assign_single_center( Point_1D point )
-{
-    double currentDistance = this->distance(point,inputCenters[0]) ;
-    int currentID = 0 ;
 
-    for(vector<Center_1D>::iterator it = inputCenters.begin() ; it != inputCenters.end() ; it++ )
-    {
-        double dist = this->distance(point,*it) ;
-        double ID = (*it).return_ID();
 
-        if( dist <= currentDistance )
-        {
-            currentDistance = dist ;
-            currentID = ID ;
-        }
-    }
 
-    point.set_centerID(currentID) ;
-}
 
 double Network::distance( Point_1D point, Center_1D center )
 {
@@ -99,7 +147,7 @@ double Network::return_max_intercenter_distance()
         if(dist>maxDist) maxDist = dist ;
     }
 
-    cout << "Maxdist = " << maxDist << ' ' ;
+    //cout << "Maxdist = " << maxDist << ' ' ;
 
     return maxDist ;
 }
